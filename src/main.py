@@ -7,6 +7,7 @@ from layout_manager import LayoutManager
 from config import Config
 from logger import LOG  # 引入 LOG 模块
 
+
 # 定义主函数，处理输入并生成 PowerPoint 演示文稿
 def main(input_file):
     config = Config()  # 加载配置文件
@@ -15,7 +16,7 @@ def main(input_file):
     if not os.path.exists(input_file):
         LOG.error(f"{input_file} 不存在。")  # 如果文件不存在，记录错误日志
         return
-    
+
     # 读取 markdown 文件的内容
     with open(input_file, 'r', encoding='utf-8') as file:
         input_text = file.read()
@@ -34,10 +35,11 @@ def main(input_file):
     LOG.info(f"解析转换后的 ChatPPT PowerPoint 数据结构:\n{powerpoint_data}")  # 记录调试日志，打印解析后的 PowerPoint 数据
 
     # 定义输出 PowerPoint 文件的路径
-    output_pptx = f"outputs/{presentation_title}.pptx"
-    
+    output_pptx = f"../outputs/{presentation_title}.pptx"
+
     # 调用 generate_presentation 函数生成 PowerPoint 演示文稿
     generate_presentation(powerpoint_data, config.ppt_template, output_pptx)
+
 
 # 程序入口
 if __name__ == "__main__":
@@ -46,10 +48,10 @@ if __name__ == "__main__":
     parser.add_argument(
         'input_file',  # 输入文件参数
         nargs='?',  # 可选参数
-        default='inputs/test_input.md',  # 默认值为 'inputs/test_input.md'
-        help='输入 markdown 文件的路径（默认: inputs/test_input.md）'
+        default='../inputs/test_input.md',  # 默认值为 '../inputs/test_input.md'
+        help='输入 markdown 文件的路径（默认: ../inputs/test_input.md）'
     )
-    
+
     # 解析命令行参数
     args = parser.parse_args()
 
