@@ -8,7 +8,6 @@ from template_manager import load_template, print_layouts, get_layout_mapping
 from layout_manager import LayoutManager
 from logger import LOG  # 引入 LOG 模块
 
-
 config = Config()
 chatbot = ChatBot(config.chatbot_prompt)
 # 加载 PowerPoint 模板，并打印模板中的可用布局
@@ -24,6 +23,7 @@ def generate_contents(message, history):
     slides_content = chatbot.chat_with_history(message["text"])
     return slides_content
 
+
 # Define the function to handle the generate button click
 def handle_generate(history):
     # Generate the slides content based on the chat history
@@ -32,17 +32,17 @@ def handle_generate(history):
     powerpoint_data, presentation_title = parse_input_text(slides_content, layout_manager)
     # 定义输出 PowerPoint 文件的路径
     output_pptx = f"outputs/{presentation_title}.pptx"
-    
+
     # 调用 generate_presentation 函数生成 PowerPoint 演示文稿
     generate_presentation(powerpoint_data, config.ppt_template, output_pptx)
 
     return output_pptx
 
+
 # Create the Gradio ChatInterface within a Blocks context
 with gr.Blocks(title="ChatPPT",
                css="body { animation: fadeIn 2s; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }"
-               ) as demo:
-
+               ) as app:
     gr.Markdown("## ChatPPT")  # 场景选择说明
 
     contents_chatbot = gr.Chatbot(
@@ -66,9 +66,10 @@ with gr.Blocks(title="ChatPPT",
                        inputs=contents_chatbot,
                        outputs=gr.File(label="Generated PowerPoint File"))
 
-
 if __name__ == "__main__":
-    demo.launch(share=True)
-
-
-    
+    app.launch(
+        share=True,  # 创建公共链接
+        inline=True,
+        server_name="0.0.0.0",
+        server_port=8893
+    )
