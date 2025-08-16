@@ -184,8 +184,9 @@ with gr.Blocks(
 # 主程序入口
 if __name__ == "__main__":
     # 启动Gradio应用，允许队列功能，并通过 HTTPS 访问
-    demo.queue().launch(
-        share=False,
+    demo.launch(
+        share=True,  # 创建公共链接
+        inline=True,
         server_name="0.0.0.0",
         server_port=7860,
         # auth=("django", "qaz!@#$") # ⚠️注意：记住修改密码
