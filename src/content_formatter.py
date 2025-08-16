@@ -1,17 +1,25 @@
 # content_formatter.py
+import os
 from abc import ABC, abstractmethod
 
-from langchain_openai import ChatOpenAI
+from langchain_community.chat_models import ChatTongyi
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # 导入提示模板相关类
 from langchain_core.messages import HumanMessage  # 导入消息类
 from langchain_core.runnables.history import RunnableWithMessageHistory  # 导入带有消息历史的可运行类
 
 from logger import LOG  # 导入日志工具
 
+# 从环境变量中获取阿里云百练的 API Key
+DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
+# 阿里云百练的官网地址
+DASHSCOPE_API_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+
 class ContentFormatter(ABC):
     """
     聊天机器人基类，提供聊天功能。
     """
+
     def __init__(self, prompt_file="./prompts/content_formatter.txt"):
         self.prompt_file = prompt_file
         self.prompt = self.load_prompt()
@@ -28,7 +36,6 @@ class ContentFormatter(ABC):
         except FileNotFoundError:
             raise FileNotFoundError(f"找不到提示文件 {self.prompt_file}!")
 
-
     def create_formatter(self):
         """
         初始化聊天机器人，包括系统提示和消息历史记录。
@@ -38,15 +45,10 @@ class ContentFormatter(ABC):
             ("system", self.prompt),  # 系统提示部分
             ("human", "{input}"),  # 消息占位符
         ])
-        
-        self.model = ChatOpenAI(
-            model="gpt-4o-mini",
-            temperature=0.5,
-            max_tokens=4096,
-        )
-        
-        self.formatter = system_prompt | self.model  # 使用的模型名称)
 
+        self.model = ChatTongyi(model="qwen-max")
+
+        self.formatter = system_prompt | self.model  # 使用的模型名称)
 
     def format(self, raw_content):
         """

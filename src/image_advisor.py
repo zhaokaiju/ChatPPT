@@ -7,15 +7,22 @@ from bs4 import BeautifulSoup
 from PIL import Image
 from io import BytesIO
 
-from langchain_openai import ChatOpenAI
+from langchain_community.chat_models import ChatTongyi
 from langchain_core.prompts import ChatPromptTemplate
 
 from logger import LOG  # 导入日志工具
+
+# 从环境变量中获取阿里云百练的 API Key
+DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
+# 阿里云百练的官网地址
+DASHSCOPE_API_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+
 
 class ImageAdvisor(ABC):
     """
     聊天机器人基类，提供建议配图的功能。
     """
+
     def __init__(self, prompt_file="./prompts/image_advisor.txt"):
         self.prompt_file = prompt_file
         self.prompt = self.load_prompt()
@@ -41,11 +48,7 @@ class ImageAdvisor(ABC):
             ("human", "**Content**:\n\n{input}"),  # 消息占位符
         ])
 
-        self.model = ChatOpenAI(
-            model="gpt-4o-mini",
-            temperature=0.7,
-            max_tokens=4096,
-        )
+        self.model = ChatTongyi(model="qwen-max")
         self.advisor = chat_prompt | self.model
 
     def generate_images(self, markdown_content, image_directory="tmps", num_images=3):
@@ -75,7 +78,8 @@ class ImageAdvisor(ABC):
             images = self.get_bing_images(slide_title, query, num_images, timeout=1, retries=3)
             if images:
                 for image in images:
-                    LOG.debug(f"Name: {image['slide_title']}, Query: {image['query']} 分辨率：{image['width']}x{image['height']}")
+                    LOG.debug(
+                        f"Name: {image['slide_title']}, Query: {image['query']} 分辨率：{image['width']}x{image['height']}")
             else:
                 LOG.warning(f"No images found for {slide_title}.")
                 continue
@@ -135,7 +139,7 @@ class ImageAdvisor(ABC):
                 if attempt == retries - 1:
                     LOG.error(f"Max retries reached for query '{query}'.")
                     return []
-        
+
         soup = BeautifulSoup(response.text, "html.parser")
         image_elements = soup.select("a.iusc")
 
@@ -169,7 +173,7 @@ class ImageAdvisor(ABC):
                     LOG.warning(f"Attempt {attempt + 1}/{retries} failed for image '{link}': {e}")
                     if attempt == retries - 1:
                         LOG.error(f"Max retries reached for image '{link}'. Skipping.")
-        
+
         sorted_images = sorted(image_data, key=lambda x: x["resolution"], reverse=True)
         return sorted_images
 
