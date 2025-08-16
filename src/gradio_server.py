@@ -17,7 +17,6 @@ from openai_whisper import asr, transcribe
 # from minicpm_v_model import chat_with_image
 from docx_parser import generate_markdown_from_docx
 
-
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "ChatPPT"
 
@@ -83,7 +82,7 @@ def generate_contents(message, history):
         LOG.error(f"[内容生成错误]: {e}")
         # 抛出 Gradio 错误，以便在界面上显示友好的错误信息
         raise gr.Error(f"网络问题，请重试:)")
-        
+
 
 def handle_image_generate(history):
     try:
@@ -91,7 +90,7 @@ def handle_image_generate(history):
         slides_content = history[-1]["content"]
 
         content_with_images, image_pair = image_advisor.generate_images(slides_content)
-        
+
         # for k, v in image_pair.items():
         #     history.append(
         #         # {"text": k, "files": FileData(path=v)}
@@ -108,6 +107,7 @@ def handle_image_generate(history):
         # 提示用户先输入主题内容或上传文件
         raise gr.Error(f"【提示】未找到合适配图，请重试！")
 
+
 # 定义处理生成按钮点击事件的函数
 def handle_generate(history):
     try:
@@ -117,7 +117,7 @@ def handle_generate(history):
         powerpoint_data, presentation_title = parse_input_text(slides_content, layout_manager)
         # 定义输出的 PowerPoint 文件路径
         output_pptx = f"outputs/{presentation_title}.pptx"
-        
+
         # 生成 PowerPoint 演示文稿
         generate_presentation(powerpoint_data, config.ppt_template, output_pptx)
         return output_pptx
@@ -126,15 +126,15 @@ def handle_generate(history):
         # 提示用户先输入主题内容或上传文件
         raise gr.Error(f"【提示】请先输入你的主题内容或上传文件")
 
+
 # 创建 Gradio 界面
 with gr.Blocks(
-    title="ChatPPT",
-    css="""
+        title="ChatPPT",
+        css="""
     body { animation: fadeIn 2s; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     """
 ) as demo:
-
     # 添加标题
     gr.Markdown("## ChatPPT")
 
@@ -187,5 +187,6 @@ if __name__ == "__main__":
     demo.queue().launch(
         share=False,
         server_name="0.0.0.0",
+        server_port=7860,
         # auth=("django", "qaz!@#$") # ⚠️注意：记住修改密码
     )
